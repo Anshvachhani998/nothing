@@ -5,7 +5,7 @@ import asyncio
 import yt_dlp
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from info import LOG_CHANNEL
 HTTP_PROXY = ""
 
 youtube_dl_username = None  
@@ -82,8 +82,13 @@ async def handle_download_button(client, callback_query):
                 await callback_query.message.edit_text("❌ Error: No downloadable video found.")
 
     except yt_dlp.utils.DownloadError as e:
+        error_text = f"❌ **DownloadError:** {str(e)}\nLink: {youtube_link}"
         logging.exception("Error downloading YouTube video: %s", e)
         await callback_query.message.edit_text("❌ Error: The video is unavailable. It may have been removed or is restricted.")
+        await client.send_message(LOG_CHANNEL, error_text)
+
     except Exception as e:
+        error_text = f"❌ **Exception:** {str(e)}\nLink: {youtube_link}"
         logging.exception("Error processing YouTube link: %s", e)
         await callback_query.message.edit_text("❌ Error: Failed to process the YouTube link. Please try again later.")
+        await client.send_message(LOG_CHANNEL, error_text)
